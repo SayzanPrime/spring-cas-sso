@@ -2,6 +2,8 @@ package com.isicod.net.springCas.controller;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jasig.cas.client.validation.Assertion;
 import org.jasig.cas.client.validation.Cas30ServiceTicketValidator;
@@ -30,11 +32,24 @@ public class AuthController {
 
 		try {
 			Assertion assertion = ticketValidator.validate(ticket, service);
+			Map<String, Object> attributes = assertion.getPrincipal().getAttributes();
+			
+			String uid = attributes.get("uid").toString();
+			
+			// TODO: Fetch profil info here
+			
 			String username = assertion.getPrincipal().getName();
 
 			String token = JWT.create().withSubject(username)
 					.withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION))
 					.sign(Algorithm.HMAC512(SecurityConstants.SECRET_KEY));
+			
+			Map<String, Object> response = new HashMap<>();
+			
+			response.put("jwt", token);
+			
+			// TODO: Add profil object here
+			response.put("profil", null);
 
 			return ResponseEntity.ok(Collections.singletonMap("jwt", token));
 
